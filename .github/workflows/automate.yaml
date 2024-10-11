@@ -33,7 +33,7 @@ jobs:
           fi
           
           # Extrair o repositório mapeado
-          MAPPED_REPO=$(echo "$ISSUE" | jq -r '.body' | grep 'Repository:' | awk '{print $3}')
+          MAPPED_REPO=$(echo "$ISSUE" | jq -r '.body' | grep 'Repository:' | awk '{print $5}')
           
           if [ -z "$MAPPED_REPO" ]; then
             echo "Repositório mapeado não encontrado para o Unique ID $UNIQUE_ID."
@@ -41,13 +41,13 @@ jobs:
           fi
           
           echo "Repositório mapeado: $MAPPED_REPO"
-          echo "mapped_repo=$MAPPED_REPO" >> $GITHUB_OUTPUT
+          echo "mapped_repo=$MAPPED_REPO" >> $GITHUB_ENV
 
       - name: Trigger repository_dispatch on mapped repository
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_PAT }}
         run: |
-          curl -X POST https://api.github.com/repos/$MAPPED_REPO/dispatches \
+          curl -X POST https://api.github.com/repos/${{env.mapped_repo}}}/dispatches \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github.v3+json" \
             -d '{
