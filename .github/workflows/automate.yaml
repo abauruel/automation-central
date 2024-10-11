@@ -53,7 +53,7 @@ jobs:
             -d '{
                   "event_type": "callback_received",
                   "client_payload": {
-                    "unique_id": "'"${{ github.event.client_payload.unique_id }}"'"
+                    "unique_id": "${{ github.event.client_payload.unique_id }}"
                   }
                 }'
 
