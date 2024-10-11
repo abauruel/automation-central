@@ -47,7 +47,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_PAT }}
         run: |
-          curl -X POST https://api.github.com/repos/${{env.mapped_repo}}}/dispatches \
+          curl -X POST https://api.github.com/repos/${{env.mapped_repo}}/dispatches \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github.v3+json" \
             -d '{
