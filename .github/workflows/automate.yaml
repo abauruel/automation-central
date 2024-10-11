@@ -1,0 +1,68 @@
+name: Process Callback
+
+on:
+  repository_dispatch:
+    types: [callback_received]
+
+jobs:
+  handle_callback:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout central repository
+        uses: actions/checkout@v4
+
+      - name: Retrieve mapping
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          UNIQUE_ID=${{ github.event.client_payload.unique_id }}
+          REPO_OWNER=$(echo "${{ github.repository }}" | cut -d'/' -f1)
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          echo "organization=${REPO_OWNER}" >> $GITHUB_ENV
+          echo "repo_name=${REPO_NAME}" >> $GITHUB_ENV
+
+          # Buscar Issues com o label 'unique-id-mapping' contendo o Unique ID
+          ISSUE=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/issues?labels=unique-id-mapping&state=open" | \
+            jq -r ".[] | select(.title | contains(\"$UNIQUE_ID\"))")
+          
+          if [ -z "$ISSUE" ]; then
+            echo "Unique ID $UNIQUE_ID não encontrado."
+            exit 1
+          fi
+          
+          # Extrair o repositório mapeado
+          MAPPED_REPO=$(echo "$ISSUE" | jq -r '.body' | grep 'Repository:' | awk '{print $2}')
+          
+          if [ -z "$MAPPED_REPO" ]; then
+            echo "Repositório mapeado não encontrado para o Unique ID $UNIQUE_ID."
+            exit 1
+          fi
+          
+          echo "Repositório mapeado: $MAPPED_REPO"
+          echo "mapped_repo=$MAPPED_REPO" >> $GITHUB_OUTPUT
+
+      - name: Trigger repository_dispatch on mapped repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -X POST https://api.github.com/repos/$MAPPED_REPO/dispatches \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d '{
+                  "event_type": "callback_received",
+                  "client_payload": {
+                    "unique_id": "'"${{ github.event.client_payload.unique_id }}"'"
+                  }
+                }'
+
+      - name: Close the mapping issue
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+            ISSUE_NUMBER=$(echo "$ISSUE" | jq -r '.number')
+            curl -X PATCH https://api.github.com/repos/${{env.organization}}/${{env.repo_name}}/issues/$ISSUE_NUMBER \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"state": "closed"}
