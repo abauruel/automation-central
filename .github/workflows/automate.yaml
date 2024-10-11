@@ -65,4 +65,4 @@ jobs:
             curl -X PATCH https://api.github.com/repos/${{env.organization}}/${{env.repo_name}}/issues/$ISSUE_NUMBER \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Content-Type: application/json" \
-            -d '{"state": "closed"}
+            -d '{"state": "closed"}'
