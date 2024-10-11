@@ -33,7 +33,7 @@ jobs:
           fi
           
           # Extrair o repositório mapeado
-          MAPPED_REPO=$(echo "$ISSUE" | jq -r '.body' | grep 'Repository:' | awk '{print $2}')
+          MAPPED_REPO=$(echo "$ISSUE" | jq -r '.body' | grep 'Repository:' | awk '{print $3}')
           
           if [ -z "$MAPPED_REPO" ]; then
             echo "Repositório mapeado não encontrado para o Unique ID $UNIQUE_ID."
