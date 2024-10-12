@@ -33,7 +33,7 @@ jobs:
           fi
           
           ISSUE_NUMBER=$(echo "$ISSUE" | jq -r '.number')
-          echo "issue_number=$ISSUE_NUMBER" >> GITHUB_ENV
+          echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_ENV
 
           # Extrair o repositório mapeado
           MAPPED_REPO=$(echo "$ISSUE" | jq -r '.body' | grep 'Repository:' | awk '{print $5}')
