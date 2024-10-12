@@ -32,6 +32,9 @@ jobs:
             exit 1
           fi
           
+          ISSUE_NUMBER=$(echo "$ISSUE" | jq -r '.number')
+          echo "issue_number=$ISSUE_NUMBER" >> GITHUB_ENV
+
           # Extrair o repositório mapeado
           MAPPED_REPO=$(echo "$ISSUE" | jq -r '.body' | grep 'Repository:' | awk '{print $5}')
           
@@ -42,6 +45,7 @@ jobs:
           
           echo "Repositório mapeado: $MAPPED_REPO"
           echo "mapped_repo=$MAPPED_REPO" >> $GITHUB_ENV
+          
 
       - name: Trigger repository_dispatch on mapped repository
         env:
@@ -61,8 +65,7 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.TOKEN_PAT }}
         run: |
-            ISSUE_NUMBER=$(echo "$ISSUE" | jq -r '.number')
-            curl -X PATCH https://api.github.com/repos/${{env.organization}}/${{env.repo_name}}/issues/$ISSUE_NUMBER \
+            curl -X PATCH https://api.github.com/repos/${{env.organization}}/${{env.repo_name}}/issues/${{env.issue_number}} \
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Content-Type: application/json" \
             -d '{"state": "closed"}'
