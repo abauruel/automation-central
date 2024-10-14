@@ -1,0 +1,13 @@
+name: repository and schedule dispatch
+on:
+  repository_dispatch:
+    types: [caller_dispatch]
+  schedule:
+    - cron "1/10 * * * *"
+jobs:
+  processing-caller:
+    runs-on: ubuntu-latest
+    steps:
+     - name: Print payload
+       run: |
+        echo "mensagem recebida: ${{ github.event.client_payload.message }}"
