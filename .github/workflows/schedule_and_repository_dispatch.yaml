@@ -3,11 +3,17 @@ on:
   repository_dispatch:
     types: [caller_dispatch]
   schedule:
-    - cron: "1/10 * * * *"
+    - cron: "*/5 * * * *"
 jobs:
   processing-caller:
     runs-on: ubuntu-latest
     steps:
-     - name: Print payload
+     - name: Print schedule message
+       if: ${{github.event_name == 'schedule' }}
        run: |
-        echo "mensagem recebida: ${{ github.event.client_payload.message }}"
+        echo "agendamento executado"
+
+     - name: Print payload
+       if: ${{github.event_name != 'schedule' }}
+       run: |
+        echo "${{ github.event.client_payload.message }}"
