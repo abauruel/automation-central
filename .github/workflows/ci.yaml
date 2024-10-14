@@ -1,0 +1,25 @@
+name: CI
+on:
+  workflow_dispatch:
+    inputs:
+      unique-id:
+        type: string
+        required: true
+  
+jobs:
+  generate-artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate unique identifier
+        id: generate-id
+        run: |
+          UUID=$(uuidgen)
+          echo "$UUID" > unique_id.txt
+          echo "uuid=$UUID" >> $GITHUB_OUTPUT
+
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.generate-id.outputs.uuid }}
+          path: unique_id.txt
