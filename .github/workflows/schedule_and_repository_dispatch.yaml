@@ -18,6 +18,13 @@ jobs:
         -H "X-GitHub-Api-Version: 2022-11-28" \
         https://api.github.com/repos/abauruel/automation-central/actions/artifacts)
 
+        echo "$response"
+        artifacts_exist=$(echo "$response" | jq 'has("artifacts") and .artifacts != null')
+        if [[ "$artifacts_exist" != "true" ]]; then
+            echo "Erro: A resposta não contém a chave 'artifacts' ou a chave é null."
+            exit 1
+        fi
+
         is_array=$(echo "$response" | jq '.artifacts | if type == "array" then true else false end')
         array_length=$(echo "$response" | jq '.artifacts | length')
 
