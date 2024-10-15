@@ -3,7 +3,7 @@ on:
   repository_dispatch:
     types: [caller_dispatch]
   schedule:
-    - cron: "1/5 * * * *"
+    - cron: "32/5 * * * *"
 jobs:
   processing-caller:
     runs-on: ubuntu-latest
